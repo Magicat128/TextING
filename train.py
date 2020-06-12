@@ -21,14 +21,14 @@ flags.DEFINE_string('dataset', 'mr', 'Dataset string.')  # 'mr','ohsumed','R8','
 flags.DEFINE_string('model', 'gnn', 'Model string.') 
 flags.DEFINE_float('learning_rate', 0.01, 'Initial learning rate.')
 flags.DEFINE_integer('epochs', 200, 'Number of epochs to train.')
-flags.DEFINE_integer('batch_size', 4096, 'Number of batches per epoch.') 
-flags.DEFINE_integer('input_dim', 300, 'Dimension of input')
+flags.DEFINE_integer('batch_size', 4096, 'Size of batches per epoch.') 
+flags.DEFINE_integer('input_dim', 300, 'Dimension of input.')
 flags.DEFINE_integer('hidden', 96, 'Number of units in hidden layer.') # 32, 64, 96, 128
 flags.DEFINE_integer('steps', 2, 'Number of graph layers.')
 flags.DEFINE_float('dropout', 0.5, 'Dropout rate (1 - keep probability).')
 flags.DEFINE_float('weight_decay', 0, 'Weight for L2 loss on embedding matrix.')
 flags.DEFINE_integer('early_stopping', -1, 'Tolerance for early stopping (# of epochs).')
-flags.DEFINE_integer('max_degree', 3, 'Maximum Chebyshev polynomial degree.')
+flags.DEFINE_integer('max_degree', 3, 'Maximum Chebyshev polynomial degree.') # Not used
 
 # Load data
 train_adj, train_feature, train_y, val_adj, val_feature, val_y, test_adj, test_feature, test_y = load_data(FLAGS.dataset)
@@ -48,8 +48,7 @@ test_feature = preprocess_features(test_feature)
 
 if FLAGS.model == 'gnn':
     # support = [preprocess_adj(adj)]
-    # num_supports = len(support)
-    num_supports = 1
+    # num_supports = 1
     model_func = GNN
 elif FLAGS.model == 'gcn_cheby': # not used
     # support = chebyshev_polynomials(adj, FLAGS.max_degree)
@@ -112,7 +111,6 @@ print('train start...')
 # Train model
 for epoch in range(FLAGS.epochs):
     t = time.time()
-    # Construct feed dictionary
         
     # Training step
     indices = np.arange(0, len(train_y))
@@ -122,6 +120,7 @@ for epoch in range(FLAGS.epochs):
     for start in range(0, len(train_y), FLAGS.batch_size):
         end = start + FLAGS.batch_size
         idx = indices[start:end]
+        # Construct feed dictionary
         feed_dict = construct_feed_dict(train_feature[idx], train_adj[idx], train_mask[idx], train_y[idx], placeholders)
         feed_dict.update({placeholders['dropout']: FLAGS.dropout})
 
@@ -135,8 +134,9 @@ for epoch in range(FLAGS.epochs):
     val_cost, val_acc, val_duration, _, _, _ = evaluate(val_feature, val_adj, val_mask, val_y, placeholders)
     cost_val.append(val_cost)
     
+    # Test
     test_cost, test_acc, test_duration, embeddings, pred, labels = evaluate(test_feature, test_adj, test_mask, test_y, placeholders)
-    if test_acc>best_acc:
+    if test_acc > best_acc:
         best_acc = test_acc
         best_epoch = epoch
         best_cost = test_cost
@@ -155,7 +155,7 @@ for epoch in range(FLAGS.epochs):
 
 print("Optimization Finished!")
 
-# Testing
+# Best results
 print('Best epoch:', best_epoch)
 print("Test set results:", "cost=", "{:.5f}".format(best_cost),
       "accuracy=", "{:.5f}".format(best_acc))
@@ -168,6 +168,7 @@ print("Micro average Test Precision, Recall and F1-Score...")
 print(metrics.precision_recall_fscore_support(labels, preds, average='micro'))
 
 '''
+# For visualization
 doc_vectors = []
 for i in range(len(test_doc_embeddings)):
     doc_vector = test_doc_embeddings[i]
@@ -175,7 +176,6 @@ for i in range(len(test_doc_embeddings)):
     doc_vectors.append(str(np.argmax(test_y[i])) + ' ' + doc_vector_str)
 
 doc_embeddings_str = '\n'.join(doc_vectors)
-f = open('data/' + FLAGS.dataset + '_doc_vectors.txt', 'w')
-f.write(doc_embeddings_str)
-f.close()
+with open('data/' + FLAGS.dataset + '_doc_vectors.txt', 'w'):
+    f.write(doc_embeddings_str)
 '''

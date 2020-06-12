@@ -1,6 +1,8 @@
 # TextING
 
-The code and dataset for the ACL 2020 paper [Every Document Owns Its Structure: Inductive Text Classification via Graph Neural Networks](https://arxiv.org/abs/2004.13826), implemented in Tensorflow.
+The code and dataset for the ACL2020 paper [Every Document Owns Its Structure: Inductive Text Classification via Graph Neural Networks](https://arxiv.org/abs/2004.13826), implemented in Tensorflow.
+
+Some functions are based on [Text GCN](https://github.com/yao8839836/text_gcn). Thank for their work.
 
 ## Requirements
 
@@ -9,15 +11,15 @@ The code and dataset for the ACL 2020 paper [Every Document Owns Its Structure: 
 
 ## Usage
 
-Download pre-trained word embeddings from [here](http://nlp.stanford.edu/data/glove.6B.zip) and unzip to the repository.
+Download pre-trained word embeddings `glove.6B.300d.txt` from [here](http://nlp.stanford.edu/data/glove.6B.zip) and unzip to the repository.
 
 Build graphs from the datasets in `data/corpus/` as:
 
-    python build_graph.py [DATASET] [WINDOWSIZE]
+    python build_graph.py [DATASET] [WINSIZE]
 
-We have provided datasets including `mr`,`ohsumed`,`R8`and`R52`. The default sliding window size is 3.
+Provided datasets include `mr`,`ohsumed`,`R8`and`R52`. The default sliding window size is 3.
 
-To use your own dataset, preprocess the text by running `remove_words.py` before building the graphs.
+To use your own dataset, put the text file under `data/corpus/` and the label file under `data/` as other datasets do. Preprocess the text by running `remove_words.py` before building the graphs.
 
 Start training and inference as:
 
